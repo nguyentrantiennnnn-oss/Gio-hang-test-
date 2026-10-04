@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop Online</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+  body { background: #f5f5f5; }
+  header { background: #ee4d2d; color: #fff; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+  header h1 { font-size: 24px; }
+  #cart-btn { background: #fff; color: #ee4d2d; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+  .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 30px; }
+  .card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1); text-align: center; padding-bottom: 15px; }
+  .card .img { font-size: 60px; padding: 30px 0 10px; background: #fafafa; }
+  .card h3 { font-size: 16px; margin: 10px; height: 40px; }
+  .price { color: #ee4d2d; font-weight: bold; font-size: 18px; margin-bottom: 10px; }
+  .card button { background: #ee4d2d; color: #fff; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; }
+  .card button:hover { background: #d73211; }
+  #cart-panel { position: fixed; right: 0; top: 0; width: 320px; height: 100%; background: #fff; box-shadow: -2px 0 10px rgba(0,0,0,.2); padding: 20px; display: none; flex-direction: column; }
+  #cart-panel.open { display: flex; }
+  #cart-items { flex: 1; overflow-y: auto; margin: 15px 0; }
+  .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+  .cart-item button { background: none; border: none; color: red; cursor: pointer; font-size: 16px; }
+  #total { font-weight: bold; font-size: 18px; margin: 10px 0; }
+  #checkout { background: #ee4d2d; color: #fff; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🛒 Shop Online</h1>
+  <button id="cart-btn" onclick="toggleCart()">Giỏ hàng (<span id="cart-count">0</span>)</button>
+</header>
+
+<div class="products" id="products"></div>
+
+<div id="cart-panel">
+  <h2>Giỏ hàng</h2>
+  <div id="cart-items"></div>
+  <div id="total">Tổng: 0đ</div>
+  <button id="checkout" onclick="checkout()">Thanh toán</button>
+  <button onclick="toggleCart()" style="margin-top:10px;background:#ccc;border:none;padding:10px;border-radius:5px;cursor:pointer;">Đóng</button>
+</div>
+
+<script>
+const products = [
+  { id: 1, name: "Áo thun basic", price: 99000, emoji: "👕" },
+  { id: 2, name: "Giày sneaker", price: 599000, emoji: "👟" },
+  { id: 3, name: "Tai nghe bluetooth", price: 349000, emoji: "🎧" },
+  { id: 4, name: "Balo laptop", price: 429000, emoji: "🎒" },
+  { id: 5, name: "Đồng hồ thông minh", price: 1299000, emoji: "⌚" },
+  { id: 6, name: "Kính râm", price: 199000, emoji: "🕶️" },
+];
+
+let cart = [];
+
+function fmt(n) { return n.toLocaleString("vi-VN") + "đ"; }
+
+function renderProducts() {
+  document.getElementById("products").innerHTML = products.map(p => `
+    <div class="card">
+      <div class="img">${p.emoji}</div>
+      <h3>${p.name}</h3>
+      <div class="price">${fmt(p.price)}</div>
+      <button onclick="addToCart(${p.id})">Thêm vào giỏ</button>
+    </div>`).join("");
+}
+
+function addToCart(id) {
+  const item = cart.find(i => i.id === id);
+  if (item) item.qty++;
+  else cart.push({ ...products.find(p => p.id === id), qty: 1 });
+  renderCart();
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(i => i.id !== id);
+  renderCart();
+}
+
+function renderCart() {
+  const box = document.getElementById("cart-items");
+  box.innerHTML = cart.map(i => `
+    <div class="cart-item">
+      <span>${i.emoji} ${i.name} x${i.qty}</span>
+      <span>${fmt(i.price * i.qty)} <button onclick="removeFromCart(${i.id})">✖</button></span>
+    </div>`).join("") || "<p>Giỏ hàng trống</p>";
+  document.getElementById("cart-count").textContent = cart.reduce((s, i) => s + i.qty, 0);
+  document.getElementById("total").textContent = "Tổng: " + fmt(cart.reduce((s, i) => s + i.price * i.qty, 0));
+}
+
+function toggleCart() {
+  document.getElementById("cart-panel").classList.toggle("open");
+}
+
+function checkout() {
+  if (!cart.length) return alert("Giỏ hàng đang trống!");
+  alert("Đặt hàng thành công! Tổng: " + fmt(cart.reduce((s, i) => s + i.price * i.qty, 0)));
+  cart = [];
+  renderCart();
+  toggleCart();
+}
+
+renderProducts();
+</script>
+</body>
+</html>
